@@ -7,7 +7,6 @@ using Microsoft.OpenApi.Models;
 using TruckPlan.ExternalAPI.Services.FindCountryService;
 
 var builder = WebApplication.CreateBuilder(args);
-var externalApiUrl = Environment.GetEnvironmentVariable("FindCountryApiUrl");
 
 // Add services to the container.
 builder.Services.AddControllers().AddNewtonsoftJson();
@@ -26,7 +25,7 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddHttpClient("FindCountryApi", client =>
 {
-    client.BaseAddress = new Uri(externalApiUrl);
+    client.BaseAddress = new Uri(builder.Configuration["FindCountryApiUrl"]);
 });
 
 builder.Services.AddAWSLambdaHosting(LambdaEventSource.HttpApi);

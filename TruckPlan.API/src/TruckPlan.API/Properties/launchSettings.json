@@ -5,8 +5,7 @@
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "FindCountryApiAccessKey": "3d65750fefa85650207a3ddc940d815b",
-        "FindCountryApiUrl": "http://api.positionstack.com"
+        "FindCountryApiAccessKey": "3d65750fefa85650207a3ddc940d815b"
       },
       "applicationUrl": "https://localhost:54433;http://localhost:54434"
     },
