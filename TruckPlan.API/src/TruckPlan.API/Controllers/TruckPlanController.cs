@@ -18,32 +18,21 @@ namespace TruckPlan.API.Controllers
         }
 
         [ProducesResponseType(200)]
-        [ProducesResponseType(201)]
         [ProducesResponseType(500)]
-        [HttpPost("SendCoordinate")]
-        public async Task<IActionResult> PostGps([FromBody] VoyageRequestDto voyageRequestDto)
+        [HttpPut("SendCoordinate")]
+        public async Task<IActionResult> PutGps([FromBody] VoyageRequestDto voyageRequestDto)
         {
             try
             {
-                if (await _truckPlanService.CheckIfVoyageExists(voyageRequestDto.VoyageId))
-                {
-                    await _truckPlanService.UpdateVoyageAsync(voyageRequestDto.VoyageId, voyageRequestDto.Coordinate);
+                await _truckPlanService.SaveVoyageAsync(voyageRequestDto);
 
-                    return StatusCode(StatusCodes.Status200OK);
-                }
-                else
-                {
-                    await _truckPlanService.CreateVoyageAsync(voyageRequestDto);
-
-                    return StatusCode(StatusCodes.Status201Created);
-                }
+                return StatusCode(StatusCodes.Status200OK);
             }
             catch (Exception e)
             {
                 _logger.LogError(e.Message, e);
                 return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
             }
-
         }
 
         [ProducesResponseType(200)]

@@ -24,15 +24,13 @@ namespace TruckPlan.API.Services
         {
             return await _truckPlanRepository.CheckIfVoyageExists(truckPlanId);
         }
-
-        public async Task CreateVoyageAsync(VoyageRequestDto voyageRequestDto)
+        
+        public async Task SaveVoyageAsync(VoyageRequestDto voyageRequestDto)
         {
-            _logger.LogInformation($"Creating new item: {JsonConvert.SerializeObject(voyageRequestDto)}.");
-
             var latitude = voyageRequestDto.Coordinate.Latitude;
             var longitude = voyageRequestDto.Coordinate.Longitude;
-
-            var country = await GetCountryByCoordinateAsync(latitude, longitude);
+            
+            var country = GetCountryByCoordinateAsync(latitude, longitude).ToString();
 
             var voyage = new Voyage
             {
@@ -49,37 +47,20 @@ namespace TruckPlan.API.Services
                     TruckId = voyageRequestDto.Truck.TruckId,
                     LicencePlate = voyageRequestDto.Truck.LicencePlate
                 },
-                Country = new List<string>{ country },
+                Country = new List<string> { country },
                 Coordinate = new List<Coordinate>
                 {
                     new Coordinate
                     {
                         Latitude = latitude,
                         Longitude = longitude
-                    }                    
+                    }
                 },
                 SignalReceivedDate = voyageRequestDto.SignalReceivedDate
             };
 
-            await _truckPlanRepository.CreateVoyageAsync(voyage);
-        }
+            await _truckPlanRepository.SaveVoyageAsync(voyage, country);
 
-        public async Task UpdateVoyageAsync(string voyageId, CoordinateDto coordinateDto)
-        {
-            _logger.LogInformation($"Adding new coordinate: {JsonConvert.SerializeObject(coordinateDto)}.");
-
-            var latitude = coordinateDto.Latitude;
-            var longitude = coordinateDto.Longitude;
-
-            var country = GetCountryByCoordinateAsync(latitude, longitude).ToString();
-
-            var coordinate = new Coordinate
-            {
-                Latitude = latitude,
-                Longitude = longitude
-            };
-            
-            await _truckPlanRepository.UpdateVoyageAsync(voyageId, coordinate, country);
         }
 
         public async Task<double> GetTotalDistanceOfVoyagesByFilters(int age, int month, int year, string country)
@@ -97,7 +78,7 @@ namespace TruckPlan.API.Services
             return await filteredVoyages.CalculateTotalDistanceOfVoyages();
         }
 
-        private async Task<string> GetCountryByCoordinateAsync(double latitude, double longitude)
+        private async Task<string?> GetCountryByCoordinateAsync(double latitude, double longitude)
         {
             return await _findCountryService.GetCountryByCoordinate(latitude, longitude);
         }

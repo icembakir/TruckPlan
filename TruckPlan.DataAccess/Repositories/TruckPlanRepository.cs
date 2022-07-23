@@ -17,25 +17,10 @@ namespace TruckPlan.DataAccess.Repositories
             };
         }
 
-        public async Task UpdateVoyageAsync(string voyageId, Coordinate cordinate, string country)
-        {
-            var voyage = await _context.LoadAsync<Voyage>($"VOYAGE#{voyageId}", _operationConfig);
-
-            voyage.Coordinate.Add(cordinate);
-            voyage.Country.Add(country);
-
-            await _context.SaveAsync(voyage, _operationConfig);
-        }
-
         public async Task<bool> CheckIfVoyageExists(string voyageId)
         {
             var voyage = await _context.LoadAsync<Voyage>($"VOYAGE#{voyageId}", voyageId, _operationConfig);
             return voyage != null;
-        }
-
-        public async Task CreateVoyageAsync(Voyage voyage)
-        {
-            await _context.SaveAsync<Voyage>(voyage, _operationConfig);
         }
 
         public async Task<List<Voyage>> GetAllVoyagesAsync()
@@ -43,5 +28,21 @@ namespace TruckPlan.DataAccess.Repositories
             return await _context.ScanAsync<Voyage>(null, _operationConfig).GetRemainingAsync();            
         }
 
+        public async Task SaveVoyageAsync(Voyage voyage, string country)
+        {
+            var voyageItem = await _context.LoadAsync<Voyage>(voyage.PartitionKey, voyage.SortKey, _operationConfig);
+
+            if (voyageItem != null)
+            {
+                voyageItem.Coordinate.Add(voyage.Coordinate.First());
+                voyageItem.Country.Add(country);                
+            }
+            else
+            {
+                voyageItem = voyage;
+            }
+
+            await _context.SaveAsync(voyageItem, _operationConfig);
+        }
     }
 }
