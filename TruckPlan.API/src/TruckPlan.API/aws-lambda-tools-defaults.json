@@ -6,12 +6,13 @@
         "dotnet lambda help",
         "All the command line options for the Lambda command can be specified in this file."
     ],
-    "profile"     : "defaultdev",
+    "profile"     : "saml",
     "region"      : "eu-central-1",
+    "function-Name" : "TruckPlan.API",
     "configuration" : "Release",
     "s3-prefix"     : "TruckPlan.API/",
     "template"      : "serverless.template",
     "template-parameters" : "",
-    "s3-bucket"           : "dfds-rail-nonprod-terragrunt-terraform-state",
-    "stack-name"          : "test"
+    "s3-bucket"           : "dfds-rail-booking-non-prod-terraform-terragrunt-state",
+    "stack-name"          : "TruckPlanApp"
 }

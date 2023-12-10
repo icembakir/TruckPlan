@@ -38,7 +38,7 @@ namespace TruckPlan.API.Controllers
         [ProducesResponseType(200)]
         [ProducesResponseType(500)]
         [HttpGet("GetTotalDistanceByFilters")]
-        public async Task<IActionResult> GetTotalDistanceOfVoyagesByFilters(int age, int month, int year, string country)
+        public async Task<IActionResult> GetTotalDistanceOfVoyagesByFilters(int? age, int month, int year, string country)
         {
             try
             {

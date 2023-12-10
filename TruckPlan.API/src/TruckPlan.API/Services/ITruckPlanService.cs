@@ -6,6 +6,6 @@ namespace TruckPlan.API.Services
     {
         Task SaveVoyageAsync(VoyageRequestDto voyageRequestDto);
         Task<bool> CheckIfVoyageExists(string voyageId);
-        Task<double> GetTotalDistanceOfVoyagesByFilters(int age, int month, int year, string country);
+        Task<double> GetTotalDistanceOfVoyagesByFilters(int? age, int month, int year, string country);
     }
 }

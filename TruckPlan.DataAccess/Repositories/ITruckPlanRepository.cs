@@ -11,6 +11,6 @@ namespace TruckPlan.DataAccess.Repositories
     {
         Task<bool> CheckIfVoyageExists(string voyageId);
         Task<List<Voyage>> GetAllVoyagesAsync();
-        Task SaveVoyageAsync(Voyage voyage, string country);
+        Task SaveVoyageAsync(Voyage voyage);
     }
 }

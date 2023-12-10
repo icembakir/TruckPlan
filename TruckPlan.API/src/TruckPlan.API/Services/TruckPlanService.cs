@@ -1,10 +1,11 @@
-﻿using Newtonsoft.Json;
-using TruckPlan.API.Dtos;
+﻿using TruckPlan.API.Dtos;
 using TruckPlan.DataAccess.Repositories;
 using TruckPlan.DataAccess.Models;
 using TruckPlan.ExternalAPI.Services.FindCountryService;
 using TruckPlan.API.Extensions;
 using TruckPlan.API.Helpers;
+using TruckPlan.ExternalAPI.Dtos;
+using AutoMapper;
 
 namespace TruckPlan.API.Services
 {
@@ -12,13 +13,19 @@ namespace TruckPlan.API.Services
     {
         private readonly ITruckPlanRepository _truckPlanRepository;
         private readonly IFindCountryService _findCountryService;
-        private readonly ILogger<TruckPlanService> _logger;        
+        private readonly ILogger<TruckPlanService> _logger;
+        private readonly IMapper _mapper;
         
-        public TruckPlanService(ITruckPlanRepository truckPlanRepository, IFindCountryService findCountryService, ILogger<TruckPlanService> logger)
+        public TruckPlanService(
+            ITruckPlanRepository truckPlanRepository, 
+            IFindCountryService findCountryService, 
+            ILogger<TruckPlanService> logger,
+            IMapper mapper)
         {
             _truckPlanRepository = truckPlanRepository;
             _findCountryService = findCountryService;
             _logger = logger;
+            _mapper = mapper;
         }
         public async Task<bool> CheckIfVoyageExists(string truckPlanId)
         {
@@ -30,7 +37,8 @@ namespace TruckPlan.API.Services
             var latitude = voyageRequestDto.Coordinate.Latitude;
             var longitude = voyageRequestDto.Coordinate.Longitude;
             
-            var country = GetCountryByCoordinateAsync(latitude, longitude).ToString();
+            var locationResponse = GetCountryByCoordinateAsync(latitude, longitude).Result;
+            var location = _mapper.Map<Location>(locationResponse);
 
             var voyage = new Voyage
             {
@@ -47,7 +55,10 @@ namespace TruckPlan.API.Services
                     TruckId = voyageRequestDto.Truck.TruckId,
                     LicencePlate = voyageRequestDto.Truck.LicencePlate
                 },
-                Country = new List<string> { country },
+                Location = new List<Location>
+                {
+                    location
+                },
                 Coordinate = new List<Coordinate>
                 {
                     new Coordinate
@@ -59,11 +70,11 @@ namespace TruckPlan.API.Services
                 SignalReceivedDate = voyageRequestDto.SignalReceivedDate
             };
 
-            await _truckPlanRepository.SaveVoyageAsync(voyage, country);
+            await _truckPlanRepository.SaveVoyageAsync(voyage);
 
         }
 
-        public async Task<double> GetTotalDistanceOfVoyagesByFilters(int age, int month, int year, string country)
+        public async Task<double> GetTotalDistanceOfVoyagesByFilters(int? age, int month, int year, string country)
         {
             _logger.LogInformation($"Getting total distance of voyages based on filters, Age:{age} Month:{month} Year:{year} Country:{country}.");
             var voyages = await _truckPlanRepository.GetAllVoyagesAsync();
@@ -78,7 +89,7 @@ namespace TruckPlan.API.Services
             return await filteredVoyages.CalculateTotalDistanceOfVoyages();
         }
 
-        private async Task<string?> GetCountryByCoordinateAsync(double latitude, double longitude)
+        private async Task<LocationResponseDto> GetCountryByCoordinateAsync(double latitude, double longitude)
         {
             return await _findCountryService.GetCountryByCoordinate(latitude, longitude);
         }

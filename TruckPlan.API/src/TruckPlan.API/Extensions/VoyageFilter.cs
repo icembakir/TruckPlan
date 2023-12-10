@@ -4,10 +4,14 @@ namespace TruckPlan.API.Extensions
 {
     public static class VoyageFilter
     {
-        public static List<Voyage> DriverAtAge(this List<Voyage> voyages, int driverAge)
+        public static List<Voyage> DriverAtAge(this List<Voyage> voyages, int? driverAge)
         {
-            return voyages.Where(v => v.Driver.BirthDate.AddYears(driverAge) <=  DateTime.Now && 
-                                      v.Driver.BirthDate.AddYears(driverAge) > DateTime.Now.AddYears(-1)).ToList();            
+            if (driverAge == null)
+            {
+                return voyages;
+            }
+            return voyages.Where(v => v.Driver.BirthDate.AddYears((int)driverAge) <=  DateTime.Now && 
+                                      v.Driver.BirthDate.AddYears((int)driverAge) > DateTime.Now.AddYears(-1)).ToList();            
         }
 
         public static List<Voyage> VoyageAtMonthAndYear(this List<Voyage> voyages, int month, int year)
@@ -17,7 +21,7 @@ namespace TruckPlan.API.Extensions
 
         public static List<Voyage> InCountry(this List<Voyage> voyages, string country)
         {
-            return voyages.Where(v => v.Country.Contains(country)).ToList();
+            return voyages.Where(x => x.Location.Any(l => l.Country == country)).ToList();
         }
         
     }

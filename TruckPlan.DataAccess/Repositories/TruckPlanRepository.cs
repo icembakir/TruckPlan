@@ -1,4 +1,6 @@
 ﻿using Amazon.DynamoDBv2.DataModel;
+using Amazon.Runtime.Internal.Util;
+using Microsoft.Extensions.Logging;
 using TruckPlan.DataAccess.Models;
 
 namespace TruckPlan.DataAccess.Repositories
@@ -7,14 +9,16 @@ namespace TruckPlan.DataAccess.Repositories
     {
         private readonly IDynamoDBContext _context;
         private readonly DynamoDBOperationConfig _operationConfig;
+        private readonly ILogger<TruckPlanRepository> _logger;
 
-        public TruckPlanRepository(IDynamoDBContext context)
+        public TruckPlanRepository(IDynamoDBContext context, ILogger<TruckPlanRepository> logger)
         {
             _context = context;
             _operationConfig = new DynamoDBOperationConfig
             {
-                OverrideTableName = "voyages-dev"
+                OverrideTableName = "voyages-test"
             };
+            _logger = logger;
         }
 
         public async Task<bool> CheckIfVoyageExists(string voyageId)
@@ -28,21 +32,31 @@ namespace TruckPlan.DataAccess.Repositories
             return await _context.ScanAsync<Voyage>(null, _operationConfig).GetRemainingAsync();            
         }
 
-        public async Task SaveVoyageAsync(Voyage voyage, string country)
+        public async Task SaveVoyageAsync(Voyage voyage)
         {
-            var voyageItem = await _context.LoadAsync<Voyage>(voyage.PartitionKey, voyage.SortKey, _operationConfig);
-
-            if (voyageItem != null)
+            try
             {
-                voyageItem.Coordinate.Add(voyage.Coordinate.First());
-                voyageItem.Country.Add(country);                
-            }
-            else
-            {
-                voyageItem = voyage;
-            }
+                var voyageItem = await _context.LoadAsync<Voyage>(voyage.PartitionKey, voyage.SortKey, _operationConfig);
+                _logger.LogInformation($"Voyage item: {voyageItem}");
 
-            await _context.SaveAsync(voyageItem, _operationConfig);
+                if (voyageItem != null)
+                {
+                    voyageItem.Coordinate.Add(voyage.Coordinate.First());
+                    voyageItem.Location.Add(voyage.Location.First());
+                    await _context.SaveAsync(voyageItem, _operationConfig);
+                }
+                else
+                {
+                    voyageItem = voyage;
+                }
+
+                await _context.SaveAsync(voyageItem, _operationConfig);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error while saving voyage: {ex.Message} {ex}");
+            }
+            
         }
     }
 }
