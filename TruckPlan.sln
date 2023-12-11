@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
+# Visual Studio Version 22
 VisualStudioVersion = 17.1.32328.378
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TruckPlan.API", "TruckPlan.API\src\TruckPlan.API\TruckPlan.API.csproj", "{317B3FEC-1865-4E3E-B84C-C4C2239D2625}"
